@@ -3,6 +3,7 @@
 ;; Copyright (C) 2016  Chunyang Xu
 
 ;; Author: Chunyang Xu <xuchunyang.me@gmail.com>
+;; URL: https://github.com/xuchunyang/DevDocs.el
 ;; Version: 0.01
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -20,9 +21,10 @@
 
 ;;; Commentary:
 
-;; DevDocs <http://devdocs.io/> is API Documentation Browser.
-;; `devdocs.el' can launch a DevDocs search with some context, such as
-;; symbol-at-point and major-mode.
+;; DevDocs <http://devdocs.io/> is API Documentation Browser.  This
+;; package allowing you to easily search the DevDocs Documentation.
+
+;; To use, type M-x devdocs-search
 
 ;;; Code:
 

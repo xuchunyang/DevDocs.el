@@ -66,9 +66,22 @@
   (or (alist-get major-mode devdocs-alist)
       (replace-regexp-in-string "-mode$" "" (symbol-name major-mode))))
 
+(defvar devdocs-build-search-pattern-function 'devdocs-build-search-pattern-function)
+
+(defun devdocs-build-search-pattern-function ()
+  "Build search pattern base on region/symbol-at-point and major-mode."
+  (let ((documentation (alist-get major-mode devdocs-alist))
+        (query (if (use-region-p)
+                   (buffer-substring (region-beginning) (region-end))
+                 (thing-at-point 'symbol))))
+    (if documentation
+        (concat documentation " " query)
+      ;; "nil" /= nil
+      (or query ""))))
+
 (defvar devdocs-url "http://devdocs.io")
 
-(defun devdocs-search-1 (pattern)
+(defun devdocs-do-search (pattern)
   (browse-url
    (format "%s/#q=%s" devdocs-url (url-hexify-string pattern))))
 
@@ -77,17 +90,10 @@
   "Launch Devdocs search.
 CONFIRM goes with asking for confirmation."
   (interactive "P")
-  (let* ((documentation (devdocs-get-documentation major-mode))
-         (query (or (when (use-region-p)
-                      (buffer-substring (region-beginning)
-                                        (region-end)))
-                    (thing-at-point 'symbol)))
-         (pattern (if documentation
-                      (concat documentation " " query)
-                    query)))
+  (let ((pattern (funcall devdocs-build-search-pattern-function)))
     (when confirm
       (setq pattern (read-string "Searching DevDocs: " pattern)))
-    (devdocs-search-1 pattern)))
+    (devdocs-do-search pattern)))
 
 (provide 'devdocs)
 ;;; devdocs.el ends here

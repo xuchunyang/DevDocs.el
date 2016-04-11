@@ -28,7 +28,18 @@
 
 ;;; Code:
 
-(defvar devdocs-alist
+(defgroup devdocs nil
+  "Searching in DevDocs."
+  :group 'external)
+
+(defcustom devdocs-url "http://devdocs.io"
+  "DevDocs URL.
+
+Don't change this unless you setup your own DevDocs locally."
+  :type 'string
+  :group 'devdocs)
+
+(defcustom devdocs-alist
   '((c-mode           . "c")
     (c++-mode         . "c++")
     (clojure-mode     . "clojure")
@@ -59,14 +70,18 @@
     (sass-mode        . "sass")
     (scala-mode       . "scala")
     (tcl-mode         . "tcl"))
-  "Alist which maps major modes to names of DevDocs documentations.")
+  "Alist which maps major modes to names of DevDocs documentations."
+  :type '(repeat (cons (symbol :tag "Major mode")
+                       (string :tag "DevDocs documentation")))
+  :group 'devdocs)
 
-(defun devdocs-get-documentation (major-mode)
-  "Get documentation by MAJOR-MODE (a symbol)."
-  (or (alist-get major-mode devdocs-alist)
-      (replace-regexp-in-string "-mode$" "" (symbol-name major-mode))))
+(defcustom devdocs-build-search-pattern-function
+  'devdocs-build-search-pattern-function
+  "A function to be called by `devdocs-search'.
+It builds search pattern base on some context."
+  :type 'function
+  :group 'devdocs)
 
-(defvar devdocs-build-search-pattern-function 'devdocs-build-search-pattern-function)
 
 (defun devdocs-build-search-pattern-function ()
   "Build search pattern base on region/symbol-at-point and major-mode."
@@ -76,10 +91,8 @@
                  (thing-at-point 'symbol))))
     (if documentation
         (concat documentation " " query)
-      ;; "nil" /= nil
+      ;; Make sure we return a string
       (or query ""))))
-
-(defvar devdocs-url "http://devdocs.io")
 
 (defun devdocs-do-search (pattern)
   (browse-url

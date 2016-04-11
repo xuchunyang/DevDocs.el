@@ -61,6 +61,13 @@
     (tcl-mode         . "tcl"))
   "Alist which maps major modes to names of DevDocs documentations.")
 
+(defun devdocs-get-documentation (major-mode)
+  "Get documentation by `MAJOR-MODE'"
+  (let ((pair (assoc major-mode devdocs-alist)))
+    (if pair
+        (cdr pair)
+      (replace-regexp-in-string "-mode$" "" (symbol-name major-mode)))))
+
 (defun devdocs-search-1 (pattern)
   (browse-url
    (format "http://devdocs.io/#q=%s" (url-hexify-string pattern))))
@@ -70,7 +77,7 @@
   "Launch Devdocs search.
 CONFIRM goes with asking for confirmation."
   (interactive "P")
-  (let* ((documentation (alist-get major-mode devdocs-alist))
+  (let* ((documentation (devdocs-get-documentation major-mode))
          (query (or (when (use-region-p)
                       (buffer-substring (region-beginning)
                                         (region-end)))

@@ -98,6 +98,8 @@ It builds search pattern base on some context."
   (browse-url
    (format "%s/#q=%s" devdocs-url (url-hexify-string pattern))))
 
+(defvar devdocs-search-history '() "Search History.")
+
 ;;;###autoload
 (defun devdocs-search (&optional confirm)
   "Launch Devdocs search.
@@ -106,7 +108,9 @@ CONFIRM goes with asking for confirmation."
   (let ((pattern (funcall devdocs-build-search-pattern-function)))
     (when confirm
       (setq pattern (read-string "Searching DevDocs: " pattern)))
-    (devdocs-do-search pattern)))
+    (devdocs-do-search pattern)
+    (unless (string= "" pattern)
+      (add-to-list 'devdocs-search-history pattern))))
 
 (provide 'devdocs)
 ;;; devdocs.el ends here

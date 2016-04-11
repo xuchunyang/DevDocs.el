@@ -68,9 +68,11 @@
         (cdr pair)
       (replace-regexp-in-string "-mode$" "" (symbol-name major-mode)))))
 
+(defvar devdocs-url "http://devdocs.io")
+
 (defun devdocs-search-1 (pattern)
   (browse-url
-   (format "http://devdocs.io/#q=%s" (url-hexify-string pattern))))
+   (format "%s/#q=%s" devdocs-url (url-hexify-string pattern))))
 
 ;;;###autoload
 (defun devdocs-search (&optional confirm)

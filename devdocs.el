@@ -62,11 +62,9 @@
   "Alist which maps major modes to names of DevDocs documentations.")
 
 (defun devdocs-get-documentation (major-mode)
-  "Get documentation by `MAJOR-MODE'"
-  (let ((pair (assoc major-mode devdocs-alist)))
-    (if pair
-        (cdr pair)
-      (replace-regexp-in-string "-mode$" "" (symbol-name major-mode)))))
+  "Get documentation by MAJOR-MODE (a symbol)."
+  (or (alist-get major-mode devdocs-alist)
+      (replace-regexp-in-string "-mode$" "" (symbol-name major-mode))))
 
 (defvar devdocs-url "http://devdocs.io")
 

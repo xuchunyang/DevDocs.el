@@ -1,4 +1,4 @@
-# DevDocs.el
+# DevDocs.el [![MELPA](http://melpa.org/packages/devdocs-badge.svg)](http://melpa.org/#/devdocs)
 
 This is an Emacs package allowing you to easily search the
 [DevDocs](http://devdocs.io) documentation.

@@ -85,7 +85,7 @@ It builds search pattern base on some context."
 
 (defun devdocs-build-search-pattern-function ()
   "Build search pattern base on region/symbol-at-point and major-mode."
-  (let ((documentation (alist-get major-mode devdocs-alist))
+  (let ((documentation (cdr (assoc major-mode devdocs-alist)))
         (query (if (use-region-p)
                    (buffer-substring (region-beginning) (region-end))
                  (thing-at-point 'symbol))))

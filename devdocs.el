@@ -32,7 +32,7 @@
   "Searching in DevDocs."
   :group 'external)
 
-(defcustom devdocs-url "http://devdocs.io"
+(defcustom devdocs-url "https://devdocs.io"
   "DevDocs URL.
 
 Don't change this unless you setup your own DevDocs locally."

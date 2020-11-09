@@ -114,5 +114,92 @@ CONFIRM goes with asking for confirmation."
     (unless (string= "" pattern)
       (add-to-list 'devdocs-search-history pattern))))
 
+
+;; Offline
+
+;; https://devdocs.io/docs.json
+;; https://devdocs.io/docs/docs.json
+;;
+;; slug = node, express
+;; mtime = 1567469538, 1538925671
+;;
+;; https://devdocs.io/docs/node/index.json?1567469538
+;; https://docs.devdocs.io/node/db.json?1567469538
+;;
+;; https://devdocs.io/docs/express/index.json?1538925671
+;; https://docs.devdocs.io/express/db.json?1538925671
+
+;; /Users/xcy/tmp/docs/devdocs.io/node/index.json
+;; /Users/xcy/tmp/docs/devdocs.io/node/db.json
+
+(setq
+ x
+ (with-temp-buffer
+   ;; (set-buffer-multibyte t)
+   (insert-file-contents-literally "/Users/xcy/tmp/docs/devdocs.io/node/index.json")
+   (goto-char (point-min))
+   (json-read)))
+
+(setq y (mapcar (lambda (al)
+                  (let-alist al
+                    (cons .name .path)))
+                (alist-get 'entries x)))
+
+(defun devdocs--build-candidates (slug)
+  (mapcar
+   (lambda (al)
+     (let-alist al
+       (cons (format "%s --- %s --- (%s)" .name .path .type) .path)))
+   (alist-get
+    'entries 
+    (with-temp-buffer
+      (insert-file-contents-literally (format "/Users/xcy/tmp/docs/devdocs.io/%s/index.json" slug))
+      (goto-char (point-min))
+      (json-read)))))
+
+(defun devdocs--build-action (slug)
+  (lambda (candidate)
+    (pcase (split-string candidate "#")
+      ((seq dpath frag)
+       ;; (make-directory "~/.emacs.d/var/devdocs/node" t)
+       ;; (message "=> %s" (list slug candidate dpath frag))
+       (let ((file
+              ;; cache
+              ;; (expand-file-name (concat dpath ".html") (format "~/.emacs.d/var/devdocs/%s" slug))
+              (make-temp-file "devdocs-" nil ".html")))
+         (with-temp-buffer
+           (call-process "jq" nil t nil
+                         "-r"
+                         (format ".\"%s\"" dpath)
+                         (format "/Users/xcy/tmp/docs/devdocs.io/%s/db.json" slug))
+           (write-region nil nil file))
+         (let ((shr-external-rendering-functions ()))
+           (eww
+            (if frag
+                (format "file://%s#%s" file frag)
+              (format "file://%s" file)))))))))
+
+(defvar devdocs-sources
+  (mapcar
+   (lambda (slug)
+     (helm-build-sync-source (capitalize slug)
+       :candidates (devdocs--build-candidates slug)
+       :action (devdocs--build-action slug)))
+   '("node" "javascript" "express")))
+
+(defun devdocs ()
+  (interactive)
+  (helm :sources devdocs-sources))
+
+"http#http_http_createserver_options_requestlistener"
+;; /Users/xcy/Desktop/devdocs-local.txt
+(pcase (split-string "http#http_http_createserver_options_requestlistener" "#")
+  ((seq dpath frag)
+   (with-temp-buffer
+     (call-process "jq" nil t nil
+                   (format ".%s" dpath)
+                   "/Users/xcy/tmp/docs/devdocs.io/node/db.json")
+     (buffer-string))))
+
 (provide 'devdocs)
 ;;; devdocs.el ends here

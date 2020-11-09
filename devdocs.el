@@ -1,10 +1,12 @@
-;;; devdocs.el --- Launch DevDocs search  -*- lexical-binding: t; -*-
+;;; devdocs.el --- Search and view DevDocs API documentation  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  Chunyang Xu
+;; Copyright (C) 2016, 2020  Xu Chunyang
 
-;; Author: Chunyang Xu <xuchunyang.me@gmail.com>
-;; URL: https://github.com/xuchunyang/DevDocs.el
+;; Author: Xu Chunyang
+;; Homepage: https://github.com/xuchunyang/DevDocs.el
+;; Package-Requires: ((emacs "25.1"))
 ;; Version: 0.02
+;; Keywords: docs
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

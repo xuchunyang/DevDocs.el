@@ -168,10 +168,13 @@ CONFIRM goes with asking for confirmation."
               ;; (expand-file-name (concat dpath ".html") (format "~/.emacs.d/var/devdocs/%s" slug))
               (make-temp-file "devdocs-" nil ".html")))
          (with-temp-buffer
-           (call-process "jq" nil t nil
-                         "-r"
-                         (format ".\"%s\"" dpath)
-                         (format "/Users/xcy/tmp/docs/devdocs.io/%s/db.json" slug))
+           ;; XXX report error
+           (cl-assert
+            (zerop
+             (call-process "jq" nil t nil
+                           "-r"
+                           (format ".\"%s\"" dpath)
+                           (format "/Users/xcy/tmp/docs/devdocs.io/%s/db.json" slug))))
            (write-region nil nil file))
          (let ((shr-external-rendering-functions ()))
            (eww
@@ -185,7 +188,7 @@ CONFIRM goes with asking for confirmation."
      (helm-build-sync-source (capitalize slug)
        :candidates (devdocs--build-candidates slug)
        :action (devdocs--build-action slug)))
-   '("node" "javascript" "express")))
+   '("node" "javascript" "express" "jest")))
 
 (defun devdocs ()
   (interactive)
@@ -201,6 +204,52 @@ CONFIRM goes with asking for confirmation."
                    (format ".%s" dpath)
                    "/Users/xcy/tmp/docs/devdocs.io/node/db.json")
      (buffer-string))))
+
+(defvar devdocs--cache nil)
+
+(defun devdocs--get-json (url)
+  (with-current-buffer (url-retrieve-synchronously url)
+    (set-buffer-multibyte t)
+    (goto-char url-http-end-of-headers)
+    (let ((json-object-type 'alist)
+          (json-array-type  'list)
+          (json-key-type    'symbol)
+          (json-false       nil)
+          (json-null        nil))
+      (json-read))))
+
+(defun devdocs-download (slug mtime)
+  (interactive
+   (let* ((slug
+           (completing-read
+            "Name: "
+            (progn
+              (unless devdocs--cache
+                (setq devdocs--cache
+                      (devdocs--get-json "https://devdocs.io/docs/docs.json")))
+              (mapcar
+               (pcase-lambda ((map slug))
+                 slug)
+               devdocs--cache))))
+          (mtime
+           (alist-get
+            'mtime
+            (seq-find
+             (lambda (al) (let-alist al (string= .slug slug)))
+             devdocs--cache))))
+     (list slug mtime)))
+  (make-directory (format "/Users/xcy/tmp/docs/devdocs.io/%s" slug) t)
+
+  ;; XXX Error check
+  (let ((url (format "https://devdocs.io/docs/%s/index.json?%d" slug mtime))
+        (file (format "/Users/xcy/tmp/docs/devdocs.io/%s/index.json" slug)))
+    (message "Download %s as %s ..." url file)
+    (url-copy-file url file t))
+
+  (let ((url (format "https://docs.devdocs.io/%s/db.json?1538925671" slug mtime))
+        (file (format "/Users/xcy/tmp/docs/devdocs.io/%s/db.json" slug)))
+    (message "Download %s as %s ..." url file)
+    (url-copy-file url file t)))
 
 (provide 'devdocs)
 ;;; devdocs.el ends here

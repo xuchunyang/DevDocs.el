@@ -189,7 +189,8 @@ CONFIRM goes with asking for confirmation."
 
 (defun devdocs ()
   (interactive)
-  (helm :sources devdocs-sources))
+  (helm :sources devdocs-sources
+        :buffer "*helm devdocs*"))
 
 "http#http_http_createserver_options_requestlistener"
 ;; /Users/xcy/Desktop/devdocs-local.txt
